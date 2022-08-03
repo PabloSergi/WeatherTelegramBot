@@ -19,6 +19,7 @@ namespace WeatherTelegramBot
             bot = new TelegramBotClient(TlgToken);
 
             Console.WriteLine($"Запущен бот "+bot.GetMeAsync().Result.FirstName);
+            Console.ReadLine();
 
             var cts = new CancellationTokenSource();
             var cancellationToken = cts.Token;
@@ -34,7 +35,7 @@ namespace WeatherTelegramBot
                 cancellationToken
             );
 
-            //Console.ReadLine();
+            Console.ReadLine();
         }
     }
 }
