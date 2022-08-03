@@ -1,6 +1,11 @@
 ﻿using WeatherTelegramBot.BotHandlers;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Telegram.Bot;
-using Telegram.Bot.Polling;
+using Telegram.Bot.Extensions.Polling;
+using Telegram.Bot.Types;
+using Telegram.Bot.Exceptions;
 
 namespace WeatherTelegramBot
 {
@@ -15,21 +20,21 @@ namespace WeatherTelegramBot
 
             Console.WriteLine($"Запущен бот "+bot.GetMeAsync().Result.FirstName);
 
-            using var cts = new CancellationTokenSource();
-
+            var cts = new CancellationTokenSource();
+            var cancellationToken = cts.Token;
             ReceiverOptions receiverOptions = new()
             {
                 AllowedUpdates = { },
             };
+
             bot.StartReceiving(
                 Handlers.HandleUpdateAsync,
                 Handlers.HandleErrorAsync,
                 receiverOptions,
-                cancellationToken : cts.Token
+                cancellationToken
             );
 
             Console.ReadLine();
-            cts.Cancel();
         }
     }
 }
