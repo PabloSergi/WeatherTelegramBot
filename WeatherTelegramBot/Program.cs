@@ -28,7 +28,6 @@ namespace WeatherTelegramBot
                 AllowedUpdates = { },
             };
 
-            
 
             bot.StartReceiving(
                 Handlers.HandleUpdateAsync,
@@ -37,9 +36,8 @@ namespace WeatherTelegramBot
                 cancellationToken
             );
 
-            Console.WriteLine("Тест");
-
             Console.ReadLine();
+            Console.WriteLine("Тест");
         }
     }
 }
