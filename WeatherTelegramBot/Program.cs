@@ -34,7 +34,7 @@ namespace WeatherTelegramBot
                 cancellationToken
             );
 
-            Console.ReadLine();
+            //Console.ReadLine();
         }
     }
 }
