@@ -1,9 +1,9 @@
-﻿using WeatherApp.WeatherInfo;
-using Telegram.Bot;
+﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using WeatherTelegramBot.WeatherInfo;
 
-namespace WeatherApp.BotHandlers
+namespace WeatherTelegramBot.BotHandlers
 {
     public class Handlers
     {
@@ -22,7 +22,6 @@ namespace WeatherApp.BotHandlers
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-
             if (update.Type != UpdateType.Message) // Только сообщения
                 return;
             if (update.Message!.Type != MessageType.Text) // Только текстовые сообщения
@@ -77,7 +76,7 @@ namespace WeatherApp.BotHandlers
 
         public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-
+            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
         }
     }
 }

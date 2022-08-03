@@ -1,4 +1,4 @@
-﻿namespace WeatherApp.WeatherInfo
+﻿namespace WeatherTelegramBot.WeatherInfo
 {
     public class Sys
     {

@@ -1,4 +1,4 @@
-﻿using WeatherApp.BotHandlers;
+﻿using WeatherTelegramBot.BotHandlers;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 

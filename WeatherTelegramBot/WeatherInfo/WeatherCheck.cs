@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using Newtonsoft.Json;
 
-namespace WeatherApp.WeatherInfo
+namespace WeatherTelegramBot.WeatherInfo
 {
     public class WeatherCheck
     {
