@@ -1,0 +1,74 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/WeatherTelegramBot.csproj": {}
+  },
+  "projects": {
+    "/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/WeatherTelegramBot.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/WeatherTelegramBot.csproj",
+        "projectName": "WeatherTelegramBot",
+        "projectPath": "/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/WeatherTelegramBot.csproj",
+        "packagesPath": "/Users/pavelsergeev/.nuget/packages/",
+        "outputPath": "/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/pavelsergeev/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "Telegram.Bot": {
+              "target": "Package",
+              "version": "[18.0.0, )"
+            },
+            "Telegram.Bot.Extensions.Polling": {
+              "target": "Package",
+              "version": "[1.0.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.302/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
