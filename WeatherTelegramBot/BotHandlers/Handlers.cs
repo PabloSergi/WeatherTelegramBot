@@ -95,7 +95,7 @@ namespace WeatherTelegramBot.BotHandlers
 
                 if (StartMsgId > 0) //удаление /start, внутри оператора. if при старте бота начинает сбоить. 
                 {
-                   // await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: StartMsgId);
+                    await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: StartMsgId);
                     StartMsgId = 0;
                 }
 
