@@ -7,6 +7,7 @@ using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Exceptions;
 
+
 namespace WeatherTelegramBot
 {
     class Program
@@ -28,7 +29,6 @@ namespace WeatherTelegramBot
                 AllowedUpdates = { },
             };
 
-
             bot.StartReceiving(
                 Handlers.HandleUpdateAsync,
                 Handlers.HandleErrorAsync,
@@ -36,28 +36,13 @@ namespace WeatherTelegramBot
                 cancellationToken
             );
 
+            //Console.ReadKey();
 
-            await PrintAsync();   // вызов асинхронного метода
-            Console.WriteLine("Некоторые действия в методе Main");
-
-            void Print()
+            while (true)
             {
-                Thread.Sleep(30000000);     // имитация продолжительной работы
-                Console.WriteLine("Hello METANIT.COM");
+                Thread.Sleep(1000);
             }
-
-            // определение асинхронного метода
-            async Task PrintAsync()
-            {
-                Console.WriteLine("Начало метода PrintAsync"); // выполняется синхронно
-                await Task.Run(() => Print());                // выполняется асинхронно
-                Console.WriteLine("Конец метода PrintAsync");
-            }
-
-            Console.ReadLine();
-
         }
-
     }
 }
 

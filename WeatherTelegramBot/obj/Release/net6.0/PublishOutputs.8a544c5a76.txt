@@ -1,8 +1,0 @@
-/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/bin/Release/net6.0/publish/WeatherTelegramBot
-/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/bin/Release/net6.0/publish/WeatherTelegramBot.dll
-/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/bin/Release/net6.0/publish/WeatherTelegramBot.deps.json
-/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/bin/Release/net6.0/publish/WeatherTelegramBot.runtimeconfig.json
-/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/bin/Release/net6.0/publish/WeatherTelegramBot.pdb
-/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/bin/Release/net6.0/publish/Newtonsoft.Json.dll
-/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/bin/Release/net6.0/publish/Telegram.Bot.dll
-/Users/pavelsergeev/Projects/WeatherTelegramBot/WeatherTelegramBot/bin/Release/net6.0/publish/Telegram.Bot.Extensions.Polling.dll

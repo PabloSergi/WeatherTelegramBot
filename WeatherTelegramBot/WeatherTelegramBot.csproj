@@ -11,6 +11,7 @@
     <None Remove="Telegram.Bot.Extensions.Polling" />
     <None Remove="Telegram.Bot" />
     <None Remove="Newtonsoft.Json" />
+    <None Remove="Telegram.BotAPI" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Telegram.Bot.Extensions.Polling" Version="1.0.2" />
