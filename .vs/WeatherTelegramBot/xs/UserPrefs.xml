@@ -1,24 +1,24 @@
 ﻿<Properties StartupConfiguration="{91F801B7-B82C-4871-B489-C4CA4160CCFB}|Default">
-  <MonoDevelop.Ide.ItemProperties.WeatherTelegramBot PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.Workbench ActiveDocument="WeatherTelegramBot/WeatherInfo/WeatherCheck.cs">
+  <MonoDevelop.Ide.ItemProperties.WeatherTelegramBot PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="WeatherTelegramBot/BotHandlers/Handlers.cs">
     <Files>
       <File FileName="WeatherTelegramBot/Program.cs" Line="35" Column="33" />
       <File FileName="WeatherTelegramBot/WeatherInfo/Wind.cs" Line="1" Column="1" />
       <File FileName="WeatherTelegramBot/WeatherInfo/WeatherResponse.cs" Line="1" Column="1" />
       <File FileName="WeatherTelegramBot/WeatherInfo/WeatherCheck.cs" Line="25" Column="14" />
-      <File FileName="WeatherTelegramBot/BotHandlers/Handlers.cs" Line="7" Column="1" />
-      <File FileName="WeatherTelegramBot/Handlers3.cs" Line="1" Column="1" />
+      <File FileName="WeatherTelegramBot/BotHandlers/Handlers.cs" Line="241" Column="1" />
       <File FileName="WeatherTelegramBot/WeatherInfo/Clouds.cs" Line="1" Column="1" />
       <File FileName="WeatherTelegramBot/WeatherInfo/Weather.cs" Line="1" Column="1" />
       <File FileName="WeatherTelegramBot/WeatherInfo/Sys.cs" Line="1" Column="1" />
       <File FileName="WeatherTelegramBot/WeatherInfo/Main.cs" Line="1" Column="1" />
       <File FileName="WeatherTelegramBot/WeatherInfo/Coord.cs" Line="1" Column="1" />
-      <File FileName="WeatherTelegramBot/BotHandlers/Handlers.cs" />
+      <File FileName="WeatherTelegramBot/BotHandlers/User.cs" Line="20" Column="41" />
+      <File FileName="WeatherTelegramBot/BotHandlers/Handlers2.cs" Line="76" Column="7" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -29,9 +29,7 @@
                 <Node name="PackageDependencies" expanded="True" />
               </Node>
               <Node name="BotHandlers" expanded="True" />
-              <Node name="WeatherInfo" expanded="True">
-                <Node name="WeatherCheck.cs" selected="True" />
-              </Node>
+              <Node name="WeatherInfo" expanded="True" />
             </Node>
           </Node>
         </State>
@@ -41,5 +39,5 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
 </Properties>

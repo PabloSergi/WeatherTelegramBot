@@ -2,204 +2,219 @@
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using WeatherTelegramBot.WeatherInfo;
-using System.Threading.Tasks;
 using Telegram.Bot.Types.ReplyMarkups;
+using NpgsqlDb;
+
 
 namespace WeatherTelegramBot.BotHandlers
 {
     public class Handlers
     {
-        public static string? Lang { get; set; }
-        public static bool ChatOpened { get; set; } = false;
-        public static bool FirstRequest { get; set; } = true;
-        public static int FirstRequestWeatherId { get; set; } = 0;
-        public static int FirstRequestPhotoId { get; set; } = 0;
-        public static int StartMsgId { get; set; } = 0;
-        public static int MenuCurrentId { get; set; } = 0;
-        //public static bool IsStarted { get; set; } = false;
+        static List<User> usersBase = new List<User>();
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            /* if (update.Type != UpdateType.Message && update.Type != UpdateType.CallbackQuery) 
-                return; */
+            //Функция для удаления участка сообщений.
+            static async void Delete (User user, int startElement, int leftElements, ITelegramBotClient botClient)
+            {
+                while (user.messageStorage.Count > leftElements)
+                {
+                    try
+                    {
+                        await botClient.DeleteMessageAsync(chatId: user.ChatId, messageId: user.messageStorage[startElement]);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Какой-то пользователь удалил чат и решил заного написать /start");
+                    }
+                    user.messageStorage.RemoveAt(startElement);
+
+                }
+            } 
+
+            if (update.Type != UpdateType.Message && update.Type != UpdateType.CallbackQuery)
+            {
+                return;
+            }
             if (update.Type == UpdateType.Message && update.Message!.Type != MessageType.Text)
             {
-                var message = update.Message; await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: message.MessageId);
+                var message = update.Message;
+                try
+                {
+                    await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: message.MessageId);
+                }
+                catch (Exception ex) { Console.WriteLine("Проблема с обработкой эмодзи"); }
                 return;
             }
 
+            long userId = 0;
+            long chatId = 0;
+            User newUser;
 
+            if (update.Type == UpdateType.Message)
+            {
+                userId = update.Message.From.Id;
+                chatId = update.Message.Chat.Id;
+            }   
+            else // if (update.Type == UpdateType.CallbackQuery)
+            {
+                userId = update.CallbackQuery.From.Id;
+                chatId = update.CallbackQuery.Message.Chat.Id;
+            }
+
+            if (usersBase.Any(user => user.UserId == userId))
+            {
+                newUser = usersBase.Find(user => user.UserId == userId);
+            }
+            else
+            {
+                newUser = new User(userId);
+                newUser.ChatId = chatId;
+                usersBase.Add(newUser);
+            }
+
+            Localization text = new Localization(newUser.Lang);
+                        
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
 
             if (update.Type == UpdateType.Message)
             {
                 var message = update.Message;
+                newUser.messageStorage.Add(update.Message.MessageId);
 
                 if (message.Text.ToLower() == "/start")
                 {
-                    ChatOpened = false;
-                    StartMsgId = message.MessageId;
-
-                    if (MenuCurrentId > 0)
-                    {
-                        await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: MenuCurrentId);
-                        MenuCurrentId = 0;
-                    }
-                    if (!FirstRequest)
-                    {
-                        await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: FirstRequestWeatherId);
-                        await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: FirstRequestPhotoId);
-                    }
+                    newUser.ChatOpened = false;
 
                     await botClient.SendTextMessageAsync(
                     chatId: message.Chat,
-                    replyMarkup: MenuLanguage(),
-                    text: "Выберите язык / Choose language");
+                    replyMarkup: MenuLanguage(newUser),
+                    text: "___");
 
-                    MenuCurrentId = message.MessageId + 1;
-                    FirstRequest = true;
+                    newUser.messageStorage.Add(update.Message.MessageId + 1);
+
+                    await botClient.SendTextMessageAsync(
+                    chatId: message.Chat,
+                    text: newUser.text.languageDiscription);
+
+                    newUser.messageStorage.Add(update.Message.MessageId + 2);
+
+                    Delete(newUser, 0, 2, botClient);
 
                 }
-                else if (message.Text.ToLower() == "москва" && ChatOpened)
+                else if (DBCheck.CheckCity(message.Text) && newUser.ChatOpened)
                 {
-                    await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: message.MessageId);
-                    if (!FirstRequest)
-                    {
-                        await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: FirstRequestWeatherId);
-                        await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: FirstRequestPhotoId);
-                    }
-                    
-                    WeatherResponse weatherResponse = WeatherCheck.Deserialize(message.Text);
-                    
+                
+                    WeatherResponse weatherResponse = WeatherCheck.Deserialize(message.Text, newUser.Lang);
+
                     await botClient.SendTextMessageAsync(
                     chatId: message.Chat,
                     text:
-                    $"Температура в городе {weatherResponse.Name}: {weatherResponse.Main.Temp} °C\n" +
-                    $"Влажность: {weatherResponse.Main.Humidity}%\n" +
-                    $"Скорость ветра: {weatherResponse.Wind.Speed} м/с\n");
-                    Thread.Sleep(800);
+                    $"{newUser.text.temperatureAnswer} {weatherResponse.Name}: {weatherResponse.Main.Temp} °C\n" +
+                    $"{newUser.text.humidAnswer}: {weatherResponse.Main.Humidity}%\n" +
+                    $"{newUser.text.windSpdAnswer}: {weatherResponse.Wind.Speed} {newUser.text.spdType}\n");
+                    newUser.messageStorage.Add(update.Message.MessageId + 1);
 
                     await botClient.SendPhotoAsync(
                     chatId: message.Chat,
                     photo: $"https://raw.githubusercontent.com/PabloSergi/NewGit/main/WeatherApp/icons/{weatherResponse.Weather[0].Icon}.png");
+                    newUser.messageStorage.Add(update.Message.MessageId + 2);
 
-                    FirstRequest = false;
-                    FirstRequestWeatherId = message.MessageId + 1;
-                    FirstRequestPhotoId = FirstRequestWeatherId + 1;
+                    Delete(newUser, 2, 4, botClient);
                 }
-
-                else //удаление всех сообщений кроме запроса погоды  и /start.
+                else if (!DBCheck.CheckCity(message.Text) && newUser.ChatOpened)
                 {
                     await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: message.MessageId);
-                }
 
-                if (StartMsgId > 0) //удаление /start, внутри оператора. if при старте бота начинает сбоить. 
+                    await botClient.SendTextMessageAsync(
+                    chatId: message.Chat,
+                    text:$"\"{message.Text}\"? {newUser.text.idontknow}\n");
+                    newUser.messageStorage.Add(update.Message.MessageId + 1);
+
+                    Delete(newUser, 2, 4, botClient);
+                }
+                else
                 {
-                    await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: StartMsgId);
-                    StartMsgId = 0;
-                }
+                    try
+                    {
+                        await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: message.MessageId);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine("Искать баг при удалении любых сообщений кроме городов и старт");
+                    }
 
-
+                } //Удаление всех случайных сообщений.
             }
 
             if (update.Type == UpdateType.CallbackQuery)
             {
-                InlineKeyboardMarkup inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuMain();
+                InlineKeyboardMarkup inlineKeyboardMarkup;
                 string codeOfButton = update.CallbackQuery.Data;
                 string str;
+                //Кнопки.
                 switch (codeOfButton)
                 {
                     case "ru":
-                        ChatOpened = false;
-                        Lang = "ru";
-                        str = "Выбран русский язык";
+                        newUser.ChatOpened = false;
+                       // newUser.Lang = "ru";
+                        newUser.text.ChangeLanguage(newUser.Lang = "ru");
+                        str = newUser.text.menuDiscription;
+                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuMain(newUser);
                         break;
                     case "eng":
-                        ChatOpened = false;
-                        Lang = "eng";
-                        str = "English language choosed";
+                        newUser.ChatOpened = false;
+                        //newUser.Lang = "eng";
+                        newUser.text.ChangeLanguage(newUser.Lang = "eng");
+                        str = newUser.text.menuDiscription;
+                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuMain(newUser);
                         break;
                     case "menu":
-                        ChatOpened = false;
-                        str = "Выберите следующее действие";
+                        newUser.ChatOpened = false;
+                        str = newUser.text.menuDiscription;
+                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuMain(newUser);
                         break;
                     case "language":
-                        ChatOpened = false;
-                        str = "Выберите следующее действие";
-                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuLanguage();
+                        newUser.ChatOpened = false;
+                        str = newUser.text.languageDiscription;
+                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuLanguage(newUser);
                         break;
                     case "weather":
-                        ChatOpened = true;
-                        str = "Выберите следующее действие";
-                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuButton();
+                        newUser.ChatOpened = true;
+                        str = newUser.text.weatherDiscription;
+                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuButton(newUser);
                         break;
                     default:
                         throw new NotImplementedException("Unrecognized value.");
-                        break;
-                }
-                await botClient.EditMessageTextAsync(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, str, replyMarkup: inlineKeyboardMarkup);
-                MenuCurrentId = update.CallbackQuery.Message.MessageId;
 
+                }
 
+                //     await botClient.EditMessageTextAsync(update.CallbackQuery.Message.Chat.Id,
+                //         update.CallbackQuery.Message.MessageId, str, replyMarkup: inlineKeyboardMarkup);
 
-                /*
-                if (codeOfButton == "ru")
+                try
                 {
-                    ChatOpened = false;
-                    Lang = "ru";
-                    string telegramMessage = "Выбран русский язык";
-                    await botClient.EditMessageTextAsync( update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, telegramMessage, replyMarkup: (InlineKeyboardMarkup?)MenuMain());
-                    MenuCurrentId = update.CallbackQuery.Message.MessageId;
+                    await botClient.EditMessageReplyMarkupAsync(update.CallbackQuery.Message.Chat.Id,
+                                        update.CallbackQuery.Message.MessageId, replyMarkup: inlineKeyboardMarkup);
+                    await botClient.EditMessageTextAsync(update.CallbackQuery.Message.Chat.Id,
+                        update.CallbackQuery.Message.MessageId + 1, str);
+                    if (!newUser.messageStorage.Contains(update.CallbackQuery.Message.MessageId))
+                        newUser.messageStorage.Add(update.CallbackQuery.Message.MessageId);
                 }
-                if (codeOfButton == "eng")
+                catch (Exception ex)
                 {
-                    ChatOpened = false;
-                    Lang = "eng";
-                    string telegramMessage = "English language choosed";
-                    await botClient.EditMessageTextAsync( update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, telegramMessage, replyMarkup: (InlineKeyboardMarkup?)MenuMain());
-                    MenuCurrentId = update.CallbackQuery.Message.MessageId;
-                }
-                if (codeOfButton == "menu")
-                {
-                    ChatOpened = false;
-                    string telegramMessage = "Выберите следующее действие";
-                    await botClient.EditMessageTextAsync( update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, telegramMessage, replyMarkup: (InlineKeyboardMarkup?)MenuMain());
-                    MenuCurrentId = update.CallbackQuery.Message.MessageId;
-                }
-                if (codeOfButton == "language")
-                {
-                    ChatOpened = false;
-                    string telegramMessage = "Выберите язык / Choose language";
-                    await botClient.EditMessageTextAsync( update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, telegramMessage, replyMarkup: (InlineKeyboardMarkup?)MenuLanguage());
-                    MenuCurrentId = update.CallbackQuery.Message.MessageId;
-                }
-                if (codeOfButton == "weather")
-                {
-                    ChatOpened = true;
-                    string telegramMessage = "Назад в меню";
-                    await botClient.EditMessageTextAsync( update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, telegramMessage, replyMarkup: (InlineKeyboardMarkup?)MenuButton());
-                    MenuCurrentId = update.CallbackQuery.Message.MessageId;
-                } */
-            
+                    Console.WriteLine("Ошибка редактирования");
+                } 
             } 
-
-            /*async void WeatherAnswerDel(bool check, ChatId chatId, int messageId)
-            {
-                if (!check)
-                {
-                    await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: FirstRequestWeatherId);
-                    await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: FirstRequestPhotoId);
-                }
-            }*/
         }
 
-        public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        static public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
 
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
         }
 
-        private static IReplyMarkup? MenuLanguage()
+        private static IReplyMarkup? MenuLanguage(User user)
         {
             return new InlineKeyboardMarkup
             (
@@ -207,14 +222,14 @@ namespace WeatherTelegramBot.BotHandlers
                 {
                     new List<InlineKeyboardButton>
                     {
-                        InlineKeyboardButton.WithCallbackData(text: "РУССКИЙ", callbackData: "ru"),
-                        InlineKeyboardButton.WithCallbackData(text: "ENGLISH", callbackData: "eng"),
+                        InlineKeyboardButton.WithCallbackData(text: user.text.russian, callbackData: "ru"),
+                        InlineKeyboardButton.WithCallbackData(text: user.text.english, callbackData: "eng"),
                     }
                 }
             );
         }
 
-        private static IReplyMarkup? MenuButton()
+        private static IReplyMarkup? MenuButton(User user)
         {
             return new InlineKeyboardMarkup
             (
@@ -222,13 +237,13 @@ namespace WeatherTelegramBot.BotHandlers
                 {
                     new List<InlineKeyboardButton>
                     {
-                        InlineKeyboardButton.WithCallbackData(text: "MENU", callbackData: "menu"),
+                        InlineKeyboardButton.WithCallbackData(text: user.text.menu, callbackData: "menu"),
                     }
                 }
             );
         }
 
-        private static IReplyMarkup? MenuMain()
+        private static IReplyMarkup? MenuMain(User user)
         {
             return new InlineKeyboardMarkup
             (
@@ -236,11 +251,11 @@ namespace WeatherTelegramBot.BotHandlers
                 {
                     new List<InlineKeyboardButton>
                     {
-                         InlineKeyboardButton.WithCallbackData(text: "ЯЗЫК", callbackData: "language"),
-                         InlineKeyboardButton.WithCallbackData(text: "ПОГОДА", callbackData: "weather"),
+                         InlineKeyboardButton.WithCallbackData(text: user.text.language, callbackData: "language"),
+                         InlineKeyboardButton.WithCallbackData(text: user.text.weather, callbackData: "weather"),
                     }
                 }
-            );
-        }
-    }
+            ); 
+        } 
+    } 
 }

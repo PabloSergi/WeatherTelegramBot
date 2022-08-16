@@ -8,12 +8,12 @@ namespace WeatherTelegramBot.WeatherInfo
     {
         
 
-        public static WeatherResponse Deserialize(string cityName)
+        public static WeatherResponse Deserialize(string cityName, string lang)
         {
             
             string units = "metric";
             string appid = "271988e019a63beb1e08c8550b0d872f";
-            string url = $"https://api.openweathermap.org/data/2.5/weather?q={cityName}&lang={Handlers.Lang}&units={units}&appid={appid}";
+            string url = $"https://api.openweathermap.org/data/2.5/weather?q={cityName}&lang={lang}&units={units}&appid={appid}";
 
             WebRequest request = WebRequest.Create(url);
 
