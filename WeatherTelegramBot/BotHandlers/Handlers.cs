@@ -10,7 +10,10 @@ namespace WeatherTelegramBot.BotHandlers
 {
     public class Handlers
     {
-        static List<User> usersBase = new List<User>();
+        static List<User> usersBase = UsersDB.UploadUsersData();
+            //new List<User>();
+       
+        
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
@@ -30,7 +33,7 @@ namespace WeatherTelegramBot.BotHandlers
                     user.messageStorage.RemoveAt(startElement);
 
                 }
-            } 
+            }
 
             if (update.Type != UpdateType.Message && update.Type != UpdateType.CallbackQuery)
             {
@@ -73,7 +76,7 @@ namespace WeatherTelegramBot.BotHandlers
                 usersBase.Add(newUser);
             }
 
-            Localization text = new Localization(newUser.Lang);
+            Localization texts = new Localization(newUser.Lang);
                         
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
 
@@ -88,21 +91,21 @@ namespace WeatherTelegramBot.BotHandlers
 
                     await botClient.SendTextMessageAsync(
                     chatId: message.Chat,
-                    replyMarkup: MenuLanguage(newUser),
+                    replyMarkup: MenuLanguage(texts),
                     text: "___");
 
                     newUser.messageStorage.Add(update.Message.MessageId + 1);
 
                     await botClient.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: newUser.text.languageDiscription);
+                    text: texts.languageDiscription);
 
                     newUser.messageStorage.Add(update.Message.MessageId + 2);
 
                     Delete(newUser, 0, 2, botClient);
 
                 }
-                else if (DBCheck.CheckCity(message.Text) && newUser.ChatOpened)
+                else if (newUser.ChatOpened && DBCheck.CheckCity(message.Text))
                 {
                 
                     WeatherResponse weatherResponse = WeatherCheck.Deserialize(message.Text, newUser.Lang);
@@ -110,25 +113,35 @@ namespace WeatherTelegramBot.BotHandlers
                     await botClient.SendTextMessageAsync(
                     chatId: message.Chat,
                     text:
-                    $"{newUser.text.temperatureAnswer} {weatherResponse.Name}: {weatherResponse.Main.Temp} °C\n" +
-                    $"{newUser.text.humidAnswer}: {weatherResponse.Main.Humidity}%\n" +
-                    $"{newUser.text.windSpdAnswer}: {weatherResponse.Wind.Speed} {newUser.text.spdType}\n");
+                    $"{texts.temperatureAnswer} {weatherResponse.Name}: {weatherResponse.Main.Temp} °C\n" +
+                    $"{texts.humidAnswer}: {weatherResponse.Main.Humidity}%\n" +
+                    $"{texts.windSpdAnswer}: {weatherResponse.Wind.Speed} {texts.spdType}\n");
                     newUser.messageStorage.Add(update.Message.MessageId + 1);
 
-                    await botClient.SendPhotoAsync(
-                    chatId: message.Chat,
-                    photo: $"https://raw.githubusercontent.com/PabloSergi/NewGit/main/WeatherApp/icons/{weatherResponse.Weather[0].Icon}.png");
-                    newUser.messageStorage.Add(update.Message.MessageId + 2);
+                    try
+                    {
+                        await botClient.SendPhotoAsync(
+                        chatId: message.Chat,
+                    //    photo: $"~/icons/{weatherResponse.Weather[0].Icon}.png");
+                        photo: $"https://raw.githubusercontent.com/PabloSergi/WeatherTelegramBot/main/WeatherTelegramBot/icons/{weatherResponse.Weather[0].Icon}.png");
+                        newUser.messageStorage.Add(update.Message.MessageId + 2);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Проблемы с картинками");
+                    }
 
+                    //{weatherResponse.Weather[0].Icon}.png
                     Delete(newUser, 2, 4, botClient);
+                    
                 }
-                else if (!DBCheck.CheckCity(message.Text) && newUser.ChatOpened)
+                else if ( newUser.ChatOpened && !DBCheck.CheckCity(message.Text))
                 {
                     await botClient.DeleteMessageAsync(chatId: message.Chat, messageId: message.MessageId);
 
                     await botClient.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text:$"\"{message.Text}\"? {newUser.text.idontknow}\n");
+                    text:$"\"{message.Text}\"? {texts.idontknow}\n");
                     newUser.messageStorage.Add(update.Message.MessageId + 1);
 
                     Delete(newUser, 2, 4, botClient);
@@ -157,32 +170,30 @@ namespace WeatherTelegramBot.BotHandlers
                 {
                     case "ru":
                         newUser.ChatOpened = false;
-                       // newUser.Lang = "ru";
-                        newUser.text.ChangeLanguage(newUser.Lang = "ru");
-                        str = newUser.text.menuDiscription;
-                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuMain(newUser);
+                        texts.ChangeLanguage(newUser.Lang = "ru");
+                        str = texts.menuDiscription;
+                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuMain(texts);
                         break;
                     case "eng":
                         newUser.ChatOpened = false;
-                        //newUser.Lang = "eng";
-                        newUser.text.ChangeLanguage(newUser.Lang = "eng");
-                        str = newUser.text.menuDiscription;
-                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuMain(newUser);
+                        texts.ChangeLanguage(newUser.Lang = "eng");
+                        str = texts.menuDiscription;
+                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuMain(texts);
                         break;
                     case "menu":
                         newUser.ChatOpened = false;
-                        str = newUser.text.menuDiscription;
-                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuMain(newUser);
+                        str = texts.menuDiscription;
+                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuMain(texts);
                         break;
                     case "language":
                         newUser.ChatOpened = false;
-                        str = newUser.text.languageDiscription;
-                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuLanguage(newUser);
+                        str = texts.languageDiscription;
+                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuLanguage(texts);
                         break;
                     case "weather":
                         newUser.ChatOpened = true;
-                        str = newUser.text.weatherDiscription;
-                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuButton(newUser);
+                        str = texts.weatherDiscription;
+                        inlineKeyboardMarkup = (InlineKeyboardMarkup?)MenuButton(texts);
                         break;
                     default:
                         throw new NotImplementedException("Unrecognized value.");
@@ -204,8 +215,10 @@ namespace WeatherTelegramBot.BotHandlers
                 catch (Exception ex)
                 {
                     Console.WriteLine("Ошибка редактирования");
-                } 
-            } 
+                }
+            }
+
+            UsersDB.SaveUserData(usersBase);
         }
 
         static public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
@@ -214,7 +227,7 @@ namespace WeatherTelegramBot.BotHandlers
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
         }
 
-        private static IReplyMarkup? MenuLanguage(User user)
+        private static IReplyMarkup? MenuLanguage(Localization texts)
         {
             return new InlineKeyboardMarkup
             (
@@ -222,14 +235,14 @@ namespace WeatherTelegramBot.BotHandlers
                 {
                     new List<InlineKeyboardButton>
                     {
-                        InlineKeyboardButton.WithCallbackData(text: user.text.russian, callbackData: "ru"),
-                        InlineKeyboardButton.WithCallbackData(text: user.text.english, callbackData: "eng"),
+                        InlineKeyboardButton.WithCallbackData(text: texts.russian, callbackData: "ru"),
+                        InlineKeyboardButton.WithCallbackData(text: texts.english, callbackData: "eng"),
                     }
                 }
             );
         }
 
-        private static IReplyMarkup? MenuButton(User user)
+        private static IReplyMarkup? MenuButton(Localization texts)
         {
             return new InlineKeyboardMarkup
             (
@@ -237,13 +250,13 @@ namespace WeatherTelegramBot.BotHandlers
                 {
                     new List<InlineKeyboardButton>
                     {
-                        InlineKeyboardButton.WithCallbackData(text: user.text.menu, callbackData: "menu"),
+                        InlineKeyboardButton.WithCallbackData(text: texts.menu, callbackData: "menu"),
                     }
                 }
             );
         }
 
-        private static IReplyMarkup? MenuMain(User user)
+        private static IReplyMarkup? MenuMain(Localization texts)
         {
             return new InlineKeyboardMarkup
             (
@@ -251,8 +264,8 @@ namespace WeatherTelegramBot.BotHandlers
                 {
                     new List<InlineKeyboardButton>
                     {
-                         InlineKeyboardButton.WithCallbackData(text: user.text.language, callbackData: "language"),
-                         InlineKeyboardButton.WithCallbackData(text: user.text.weather, callbackData: "weather"),
+                         InlineKeyboardButton.WithCallbackData(text: texts.language, callbackData: "language"),
+                         InlineKeyboardButton.WithCallbackData(text: texts.weather, callbackData: "weather"),
                     }
                 }
             ); 

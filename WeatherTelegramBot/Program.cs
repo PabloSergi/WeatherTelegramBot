@@ -19,8 +19,6 @@ namespace WeatherTelegramBot
 
         static async Task Main(string[] args)
         {
-            bool dmg = DBCheck.CheckCity("Moscow");
-
             bot = new TelegramBotClient(TlgToken);
 
             Console.WriteLine($"Запущен бот "+bot.GetMeAsync().Result.FirstName);
@@ -42,12 +40,12 @@ namespace WeatherTelegramBot
                 cancellationToken
             );
 
-            //Console.ReadKey();
+           // Console.ReadKey();
 
             while (true)
             {
                 Thread.Sleep(1000);
-            }
+            } 
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 namespace WeatherTelegramBot.BotHandlers
 {
-    class Localization
+    public class Localization
     {
         public Localization(string lang)
         {

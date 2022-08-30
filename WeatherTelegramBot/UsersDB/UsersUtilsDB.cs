@@ -3,17 +3,23 @@ using Npgsql;
 
 namespace NpgsqlDb
 {
-    class DBUtils
+    class UsersUtilsDB
     {
         public static NpgsqlConnection GetDBConnection()
         {
-            string host = "localhost";
+            /*/ string host = "host.docker.internal";
             int port = 5432;
-            string database = "postgres";
+            string database = "users";
             string username = "postgres";
-            string password = "051333";
+            string password = "051333"; /*/
 
-            return SqlUtils.GetDBConnection(host, port, database, username, password);
+            string host = "127.0.0.1";
+            int port = 5432;
+            string database = "users";
+            string username = "postgres";
+            string password = "admin"; 
+
+            return UsersSqlUtils.GetDBConnection(host, port, database, username, password);
         }
       /*  public static MySqlConnection GetDBConnection()
         {
